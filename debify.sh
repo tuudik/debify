@@ -55,10 +55,12 @@ fi
 aptly publish repo \
     -architectures="$APTLY_ARCHITECTURES" \
     -passphrase="$passphrase" \
+    -batch \
     $APTLY_REPO_NAME \
 || echo " --- updating instead... --- " && aptly publish update \
     -architectures="$APTLY_ARCHITECTURES" \
     -passphrase="$passphrase" \
+    -batch \
     "$APTLY_DISTRIBUTION"
 
 if [ ! -z "$KEYSERVER" ] && [ ! -z "$URI" ]
