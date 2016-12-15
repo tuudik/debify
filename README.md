@@ -19,15 +19,21 @@ script for setting up the repository.
 
 ### Example
 
-Let's say I have a bunch of Debian packages at `~/my-debs`, and I've imported or [created a GPG key](http://fedoraproject.org/wiki/Creating_GPG_Keys)
+Let's say I have a bunch of new Debian packages at `~/my-debs/incoming`, and I've imported or [created a GPG key](http://fedoraproject.org/wiki/Creating_GPG_Keys)
 for signing everything with. Here's how I might run Debify if I plan on publishing the repo to
 http://example.com/apt:
 
     $ docker run -e URI=http://example.com/apt \
                  -e KEYSERVER=keyserver.ubuntu.com \
+                 -e APTLY_DISTRIBUTION=testing \
                  -v ~/.gnupg:/.gnupg \
                  -v ~/my-debs:/debs \
                  spotify/debify
+
+The repo will be created in `~/my-debs/public`. An install script will be written to `~/my-debs/public/go`,
+and `~/my-debs/install_testing`. The files in `~/my-debs/incoming` will be deleted!
+
+Don't worry about the double files in `~/my-debs/pool`. These are hardlinks.
 
 Serving
 ---
