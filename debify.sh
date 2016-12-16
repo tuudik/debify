@@ -73,7 +73,7 @@ then
     fi
 
     cat > /debs/public/go <<-END
-#!/bin/sh
+#!/bin/sh -e
 ##
 ## How to install this repository:
 ##   curl -sSL ${URI}go | sh
@@ -81,7 +81,6 @@ then
 ##   wget -qO- ${URI}go | sh
 ##
 
-set -e
 END
 
     case "$URI" in
@@ -96,13 +95,27 @@ install_https
 END
     esac
 
+    URL_STRIPPED=$(echo "$URI" | \
+        sed 's#^\(http\|https\)##;s|[^A-Za-z0-9]|_|g;s#^_*##g;s#_*$##g')
+
     cat >> /debs/public/go <<-END
 do_install() {
     apt-key adv --keyserver $KEYSERVER --recv-keys $gpg_key_id
     echo "deb $URI $APTLY_DISTRIBUTION $APTLY_COMPONENT" >> /etc/apt/sources.list
     apt-get update
 }
-do_install
+do_print() {
+    echo "----------"
+    echo "Done! Now you can install packages from the repository at $URI."
+    echo "Here is a list of all available packages:"
+    grep Package /var/lib/apt/lists/${URL_STRIPPED}_dists_${APTLY_DISTRIBUTION}_*_Packages
+}
+
+do_all() {
+    do_install
+    do_print
+}
+do_all
 END
 cp /debs/public/go /debs/install_testing
 fi
