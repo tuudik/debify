@@ -117,5 +117,5 @@ do_all() {
 }
 do_all
 END
-cp /debs/public/go /debs/install_testing
+cp /debs/public/go /debs/install_${APTLY_DISTRIBUTION}
 fi
