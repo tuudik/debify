@@ -96,7 +96,7 @@ END
     esac
 
     URL_STRIPPED=$(echo "$URI" | \
-        sed 's#^\(http\|https\)##;s|[^A-Za-z0-9]|_|g;s#^_*##g;s#_*$##g')
+        sed 's#^\(http\|https\)##; s|[^A-Za-z0-9\.]|_|g; s#^_*##g; s#_*$##g')
 
     cat >> /debs/public/go <<-END
 do_install() {
@@ -106,7 +106,7 @@ do_install() {
 }
 do_print() {
     echo "----------"
-    echo "Done! Now you can install packages from the repository at $URI."
+    echo "Done! Now you can install packages from the repository at $URI ."
     echo "Here is a list of all available packages:"
     grep Package /var/lib/apt/lists/${URL_STRIPPED}_dists_${APTLY_DISTRIBUTION}_*_Packages
 }
