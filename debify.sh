@@ -108,7 +108,7 @@ do_print() {
     echo "----------"
     echo "Done! Now you can install packages from the repository at $URI ."
     echo "Here is a list of all available packages:"
-    grep Package /var/lib/apt/lists/${URL_STRIPPED}_dists_${APTLY_DISTRIBUTION}_*_Packages
+    grep Package /var/lib/apt/lists/${URL_STRIPPED}_dists_${APTLY_DISTRIBUTION}_*_Packages | sort | uniq
 }
 
 do_all() {
