@@ -18,5 +18,8 @@ RUN apt-get update && \
     apt-get clean
 
 ADD debify.sh /debify.sh
+ADD entrypoint.sh /entrypoint.sh
 ADD aptly.conf /root/.aptly.conf
-ENTRYPOINT ["/debify.sh"]
+ENTRYPOINT ["/entrypoint.sh"]
+
+CMD ["/debify.sh"]

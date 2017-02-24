@@ -26,18 +26,32 @@ then
     exit 1
 fi
 
-APTLY_REPO_NAME=debify
+APTLY_REPO_OLD_NAME=debify
+APTLY_REPO_NAME="repo-$APTLY_DISTRIBUTION"
 
+if ! aptly repo show "$APTLY_REPO_NAME" >/dev/null 2>&1; then
+    if aptly repo show "$APTLY_REPO_OLD_NAME" >/dev/null 2>&1; then
+        echo "--- migrating repo name ---"
+        aptly repo rename "$APTLY_REPO_OLD_NAME" "$APTLY_REPO_NAME"
+    fi
+fi
+
+echo "--- creating repo: ---"
 if ! aptly repo create \
     -component="$APTLY_COMPONENT" \
     -distribution="$APTLY_DISTRIBUTION" \
-    $APTLY_REPO_NAME 2>&1 | tee out.log; then
+    "$APTLY_REPO_NAME" > out.log 2>&1; then
 
-    grep "already exists" out.log || exit 1
+    if grep "already exists" out.log; then
+        echo "repo already exists -- continuing"
+    else
+        cat out.log
+        exit 1
+    fi
 fi
 
 echo "--- adding packages: ---"
-aptly repo add -remove-files=true $APTLY_REPO_NAME /debs/incoming/
+aptly repo add -remove-files=true "$APTLY_REPO_NAME" /debs/incoming/
 
 echo "---"
 echo "current contents:"
@@ -66,26 +80,26 @@ aptly publish repo \
 if [ ! -z "$KEYSERVER" ] && [ ! -z "$URI" ]
 then
     release_sig_path=$(find /debs/public/dists -name Release.gpg | head -1)
-    gpg_key_id=$(gpg --list-packets $release_sig_path | grep -oP "(?<=keyid ).+")
+    gpg_key_id=$(gpg --list-packets "$release_sig_path" | grep -oP "(?<=keyid ).+")
 
     if [[ "$URI" != */ ]]; then
         URI="${URI}/"
     fi
 
-    cat > /debs/public/go <<-END
+    cat > "/debs/public/install_${APTLY_DISTRIBUTION}" <<-END
 #!/bin/sh -e
 ##
 ## How to install this repository:
-##   curl -sSL ${URI}go | sh
+##   curl -sSL ${URI}install_${APTLY_DISTRIBUTION} | sh
 ## OR
-##   wget -qO- ${URI}go | sh
+##   wget -qO- ${URI}install_${APTLY_DISTRIBUTION} | sh
 ##
 
 END
 
     case "$URI" in
         https://*)
-            cat >> /debs/public/go <<-END
+            cat >> "/debs/public/install_${APTLY_DISTRIBUTION}" <<-END
 install_https() {
     if [ ! -e /usr/lib/apt/methods/https ]; then
         apt-get update && apt-get install -y apt-transport-https
@@ -98,7 +112,7 @@ END
     URL_STRIPPED=$(echo "$URI" | \
         sed 's#^\(http\|https\)##; s|[^A-Za-z0-9\.]|_|g; s#^_*##g; s#_*$##g')
 
-    cat >> /debs/public/go <<-END
+    cat >> "/debs/public/install_${APTLY_DISTRIBUTION}" <<-END
 do_install() {
     apt-key adv --keyserver $KEYSERVER --recv-keys $gpg_key_id
     echo "deb $URI $APTLY_DISTRIBUTION $APTLY_COMPONENT" >> /etc/apt/sources.list
@@ -117,5 +131,5 @@ do_all() {
 }
 do_all
 END
-cp /debs/public/go /debs/install_${APTLY_DISTRIBUTION}
+cp "/debs/public/install_${APTLY_DISTRIBUTION}" "/debs/install_${APTLY_DISTRIBUTION}"
 fi
