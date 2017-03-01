@@ -51,7 +51,7 @@ if ! aptly repo create \
 fi
 
 echo "--- adding packages: ---"
-aptly repo add -remove-files=true "$APTLY_REPO_NAME" /debs/incoming/
+aptly repo add -force-replace=true -remove-files=true "$APTLY_REPO_NAME" /debs/incoming/
 
 echo "---"
 echo "current contents:"
@@ -70,11 +70,13 @@ aptly publish repo \
     -architectures="$APTLY_ARCHITECTURES" \
     -passphrase="$passphrase" \
     -batch \
+    -force-overwrite=true \
     $APTLY_REPO_NAME \
 || echo " --- updating instead... --- " && aptly publish update \
     -architectures="$APTLY_ARCHITECTURES" \
     -passphrase="$passphrase" \
     -batch \
+    -force-overwrite=true \
     "$APTLY_DISTRIBUTION"
 
 if [ ! -z "$KEYSERVER" ] && [ ! -z "$URI" ]
