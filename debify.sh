@@ -88,7 +88,7 @@ then
         URI="${URI}/"
     fi
 
-    cat > "/debs/public/install_${APTLY_REPO_NAME}" <<-END
+    cat > "/debs/public/install_$APTLY_DISTRIBUTION" <<-END
 #!/bin/sh -e
 ##
 ## How to install this repository:
@@ -101,7 +101,7 @@ END
 
     case "$URI" in
         https://*)
-            cat >> "/debs/public/install_${APTLY_REPO_NAME}" <<-END
+            cat >> "/debs/public/install_$APTLY_DISTRIBUTION" <<-END
 install_https() {
     if [ ! -e /usr/lib/apt/methods/https ]; then
         apt-get update && apt-get install -y apt-transport-https
@@ -114,10 +114,14 @@ END
     URL_STRIPPED=$(echo "$URI" | \
         sed 's#^\(http\|https\)##; s|[^A-Za-z0-9\.]|_|g; s#^_*##g; s#_*$##g')
 
-    cat >> "/debs/public/install_${APTLY_REPO_NAME}" <<-END
+    cat >> "/debs/public/install_$APTLY_DISTRIBUTION" <<-END
 do_install() {
     apt-key adv --keyserver $KEYSERVER --recv-keys $gpg_key_id
-    echo "deb $URI $APTLY_DISTRIBUTION $APTLY_COMPONENT" >> /etc/apt/sources.list
+    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys \ 00A6F0A3C300EE8C
+    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys \ EB9B1D8886F44E2A
+    echo "deb $URI $APTLY_DISTRIBUTION $APTLY_COMPONENT" > /etc/apt/sources.list.d/xroad.list
+    echo "deb http://ppa.launchpad.net/nginx/stable/ubuntu trusty main" >> /etc/apt/sources.list.d/xroad.list
+    echo "deb http://ppa.launchpad.net/openjdk-r/ppa/ubuntu trusty main" >> /etc/apt/sources.list.d/xroad.list
     apt-get update
 }
 do_print() {
@@ -133,5 +137,5 @@ do_all() {
 }
 do_all
 END
-cp "/debs/public/install_${APTLY_REPO_NAME}" "/debs/install_${APTLY_REPO_NAME}"
+cp "/debs/public/install_$APTLY_DISTRIBUTION" "/debs/install_$APTLY_DISTRIBUTION"
 fi
