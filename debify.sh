@@ -133,5 +133,5 @@ do_all() {
 }
 do_all
 END
-cp "/debs/public/install_${APTLY_DISTRIBUTION}" "/debs/install_${APTLY_DISTRIBUTION}"
+cp "/debs/public/install_${APTLY_REPO_NAME}" "/debs/install_${APTLY_REPO_NAME}"
 fi
