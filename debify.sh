@@ -13,11 +13,6 @@
 # limitations under the License.
 
 set -e
-echo $APTLY_NAME
-echo $APTLY_REPO_NAME
-echo $APTLY_COMPONENT
-echo $APTLY_DISTRIBUTION
-
 if [ ! -d /debs ]
 then
     echo "Mount your Debian package directory to /debs."
@@ -32,14 +27,12 @@ fi
 
 APTLY_REPO_OLD_NAME=debify
 APTLY_REPO_NAME="repo-$APTLY_NAME"
-
 if ! aptly repo show "$APTLY_REPO_NAME" >/dev/null 2>&1; then
     if aptly repo show "$APTLY_REPO_OLD_NAME" >/dev/null 2>&1; then
         echo "--- migrating repo name ---"
         aptly repo rename "$APTLY_REPO_OLD_NAME" "$APTLY_REPO_NAME"
     fi
 fi
-
 echo "--- creating repo: ---"
 if ! aptly repo create \
     -component="$APTLY_COMPONENT" \
@@ -72,14 +65,12 @@ fi
 
 aptly publish repo \
     -architectures="$APTLY_ARCHITECTURES" \
-    -distribution="$APTLY_DISTRIBUTION" \
     -passphrase="$passphrase" \
     -batch \
     -force-overwrite=true \
     $APTLY_REPO_NAME \
 || echo " --- updating instead... --- " && aptly publish update \
     -architectures="$APTLY_ARCHITECTURES" \
-    -distribution="$APTLY_DISTRIBUTION" \
     -passphrase="$passphrase" \
     -batch \
     -force-overwrite=true \
