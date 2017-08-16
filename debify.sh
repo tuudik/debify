@@ -22,12 +22,12 @@ fi
 
 if [ ! -d /debs/incoming ] || [ ! "$(ls -A /debs/incoming/)" ]
 then
-    echo "ensure there are new packages in /debs/incoming."
+    echo "Ensure there are new packages in /debs/incoming."
     exit 1
 fi
 
 APTLY_REPO_OLD_NAME=debify
-APTLY_REPO_NAME="repo-$APTLY_DISTRIBUTION"
+APTLY_REPO_NAME="repo-$APTLY_NAME"
 
 if ! aptly repo show "$APTLY_REPO_NAME" >/dev/null 2>&1; then
     if aptly repo show "$APTLY_REPO_OLD_NAME" >/dev/null 2>&1; then
@@ -68,16 +68,18 @@ fi
 
 aptly publish repo \
     -architectures="$APTLY_ARCHITECTURES" \
+    -distribution="$APTLY_DISTRIBUTION" \
     -passphrase="$passphrase" \
     -batch \
     -force-overwrite=true \
     $APTLY_REPO_NAME \
 || echo " --- updating instead... --- " && aptly publish update \
     -architectures="$APTLY_ARCHITECTURES" \
+    -distribution="$APTLY_DISTRIBUTION" \
     -passphrase="$passphrase" \
     -batch \
     -force-overwrite=true \
-    "$APTLY_DISTRIBUTION"
+    $APTLY_REPO_NAME
 
 if [ ! -z "$KEYSERVER" ] && [ ! -z "$URI" ]
 then
@@ -88,20 +90,20 @@ then
         URI="${URI}/"
     fi
 
-    cat > "/debs/public/install_${APTLY_DISTRIBUTION}" <<-END
+    cat > "/debs/public/install_${APTLY_REPO_NAME}" <<-END
 #!/bin/sh -e
 ##
 ## How to install this repository:
-##   curl -sSL ${URI}install_${APTLY_DISTRIBUTION} | sh
+##   curl -sSL ${URI}install_${APTLY_REPO_NAME} | sudo sh
 ## OR
-##   wget -qO- ${URI}install_${APTLY_DISTRIBUTION} | sh
+##   wget -qO- ${URI}install_${APTLY_REPO_NAME} | sudo sh
 ##
 
 END
 
     case "$URI" in
         https://*)
-            cat >> "/debs/public/install_${APTLY_DISTRIBUTION}" <<-END
+            cat >> "/debs/public/install_${APTLY_REPO_NAME}" <<-END
 install_https() {
     if [ ! -e /usr/lib/apt/methods/https ]; then
         apt-get update && apt-get install -y apt-transport-https
@@ -114,7 +116,7 @@ END
     URL_STRIPPED=$(echo "$URI" | \
         sed 's#^\(http\|https\)##; s|[^A-Za-z0-9\.]|_|g; s#^_*##g; s#_*$##g')
 
-    cat >> "/debs/public/install_${APTLY_DISTRIBUTION}" <<-END
+    cat >> "/debs/public/install_${APTLY_REPO_NAME}" <<-END
 do_install() {
     apt-key adv --keyserver $KEYSERVER --recv-keys $gpg_key_id
     echo "deb $URI $APTLY_DISTRIBUTION $APTLY_COMPONENT" >> /etc/apt/sources.list
