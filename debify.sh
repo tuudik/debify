@@ -13,6 +13,10 @@
 # limitations under the License.
 
 set -e
+echo $APTLY_NAME
+echo $APTLY_REPO_NAME
+echo $APTLY_COMPONENT
+echo $APTLY_DISTRIBUTION
 
 if [ ! -d /debs ]
 then
