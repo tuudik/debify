@@ -1,10 +1,10 @@
 FROM ubuntu:14.04
-MAINTAINER "Claus Strasburger <c@cfs.im>"
+MAINTAINER "Marko Valing <marko@radr.eu>"
 
 ENV DEBIAN_FRONTEND noninteractive
 
 # defaults for debify
-ENV APTLY_DISTRIBUTION testing
+ENV APTLY_DISTRIBUTION trusty
 ENV APTLY_COMPONENT main
 ENV KEYSERVER keyserver.ubuntu.com
 
