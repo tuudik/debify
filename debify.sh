@@ -117,8 +117,8 @@ END
     cat >> "/debs/public/install_$APTLY_DISTRIBUTION" <<-END
 do_install() {
     apt-key adv --keyserver $KEYSERVER --recv-keys $gpg_key_id
-    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys \ 00A6F0A3C300EE8C
-    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys \ EB9B1D8886F44E2A
+    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 00A6F0A3C300EE8C
+    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys EB9B1D8886F44E2A
     echo "deb $URI $APTLY_DISTRIBUTION $APTLY_COMPONENT" > /etc/apt/sources.list.d/xroad.list
     echo "deb http://ppa.launchpad.net/nginx/stable/ubuntu trusty main" >> /etc/apt/sources.list.d/xroad.list
     echo "deb http://ppa.launchpad.net/openjdk-r/ppa/ubuntu trusty main" >> /etc/apt/sources.list.d/xroad.list
